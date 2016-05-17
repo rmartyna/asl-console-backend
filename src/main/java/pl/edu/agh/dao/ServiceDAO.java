@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-class ServiceDAO implements InitializingBean {
+public class ServiceDAO implements InitializingBean {
 
     private DbConnection dbConnection;
 

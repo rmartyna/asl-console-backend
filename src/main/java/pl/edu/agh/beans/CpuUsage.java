@@ -18,6 +18,10 @@ public class CpuUsage {
 
     private Timestamp date;
 
+    public CpuUsage() {
+
+    }
+
     public CpuUsage(ResultSet resultSet) throws SQLException {
         id = resultSet.getInt(1);
         cpuId = resultSet.getInt(2);

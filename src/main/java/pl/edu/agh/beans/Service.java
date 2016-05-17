@@ -13,6 +13,10 @@ public class Service {
 
     private String description;
 
+    public Service() {
+
+    }
+
     public Service(ResultSet resultSet) throws SQLException {
         id = resultSet.getInt(1);
         host = resultSet.getString(2);

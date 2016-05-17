@@ -14,6 +14,10 @@ public class CpuFan {
 
     private Timestamp date;
 
+    public CpuFan() {
+
+    }
+
     public CpuFan(ResultSet resultSet) throws SQLException {
         id = resultSet.getInt(1);
         cpuId = resultSet.getInt(2);

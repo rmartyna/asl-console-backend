@@ -16,6 +16,10 @@ public class DiskUsage {
 
     private Timestamp date;
 
+    public DiskUsage() {
+
+    }
+
     public DiskUsage(ResultSet resultSet) throws SQLException {
         id = resultSet.getInt(1);
         diskId = resultSet.getInt(2);
