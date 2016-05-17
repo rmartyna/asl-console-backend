@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context-4.2.xsd
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.1.xsd">
+
+    <context:property-placeholder location="classpath:asl-console-backend.properties" />
+
+    <bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+        <property name="host" value="${mail.host}" />
+        <property name="port" value="${mail.port}" />
+        <property name="username" value="${mail.username}" />
+        <property name="password" value="${mail.passowrd}" />
+
+        <property name="javaMailProperties">
+            <props>
+                <prop key="mail.smtp.auth">true</prop>
+                <prop key="mail.smtp.starttls.enable">true</prop>
+            </props>
+        </property>
+    </bean>
+
+    <bean id="mailUtils" class="pl.edu.agh.MailUtils">
+        <property name="mailSender" ref="mailSender"/>
+    </bean>
+
+
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="org.postgresql.Driver"/>
+        <property name="url" value="${db.url}"/>
+        <property name="username" value="${db.username}"/>
+        <property name="password" value="${db.password}"/>
+    </bean>
+
+    <bean id="dbConnection" class="pl.edu.agh.DbConnection">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="host" value="${service.host}"/>
+        <property name="port" value="${service.port}"/>
+    </bean>
+
+    <bean id="serviceDAO" class="pl.edu.agh.dao.ServiceDAO" >
+        <property name="dbConnection" ref="dbConnection"/>
+    </bean>
+
+    <bean id="cpuDAO" class="pl.edu.agh.dao.CpuDAO" >
+        <property name="dbConnection" ref="dbConnection"/>
+    </bean>
+
+    <bean id="diskDAO" class="pl.edu.agh.dao.DiskDAO" >
+        <property name="dbConnection" ref="dbConnection"/>
+    </bean>
+
+    <bean id="gpuDAO" class="pl.edu.agh.dao.GpuDAO">
+        <property name="dbConnection" ref="dbConnection"/>
+    </bean>
+
+    <bean id="memoryDAO" class="pl.edu.agh.dao.MemoryDAO">
+        <property name="dbConnection" ref="dbConnection"/>
+    </bean>
+
+    <bean id="networkDAO" class="pl.edu.agh.dao.NetworkDAO">
+        <property name="dbConnection" ref="dbConnection"/>
+    </bean>
+
+    <bean id="systemLogsDAO" class="pl.edu.agh.dao.SystemLogsDAO">
+        <property name="dbConnection" ref="dbConnection"/>
+    </bean>
+
+    <bean id="serviceConnection" class="pl.edu.agh.ServiceConnection">
+        <property name="serviceDAO" ref="serviceDAO"/>
+    </bean>
+
+</beans>
