@@ -77,6 +77,13 @@ public class DiskDAO implements InitializingBean {
         return partitionList;
     }
 
+    public DiskUsage getNewestUsageByServiceId(int serviceId) throws SQLException {
+        Disk disk = getByServiceId(serviceId);
+        return disk.getDiskUsageList().get(disk.getDiskUsageList().size() - 1);
+    }
+
+
+
     public void setDbConnection(DbConnection dbConnection) {
         this.dbConnection = dbConnection;
     }

@@ -72,6 +72,10 @@
         <property name="dbConnection" ref="dbConnection"/>
     </bean>
 
+    <bean id="consoleConfigurationDAO" class="pl.edu.agh.dao.ConsoleConfigurationDAO">
+        <property name="dbConnection" ref="dbConnection"/>
+    </bean>
+
     <bean id="serviceConnection" class="pl.edu.agh.ServiceConnection">
         <property name="serviceDAO" ref="serviceDAO"/>
     </bean>

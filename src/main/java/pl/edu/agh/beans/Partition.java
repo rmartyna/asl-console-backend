@@ -1,6 +1,5 @@
 package pl.edu.agh.beans;
 
-import sun.nio.ch.Net;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

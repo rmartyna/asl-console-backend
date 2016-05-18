@@ -91,6 +91,16 @@ public class CpuDAO implements InitializingBean {
         return cpuUsageList;
     }
 
+    public CpuTemp getNewestTempByServiceId(int serviceId) throws SQLException {
+        Cpu cpu = getByServiceId(serviceId);
+        return cpu.getCpuTempList().get(cpu.getCpuTempList().size() - 1);
+    }
+
+    public CpuUsage getNewestUsageByServiceId(int serviceId) throws SQLException {
+        Cpu cpu = getByServiceId(serviceId);
+        return cpu.getCpuUsageList().get(cpu.getCpuUsageList().size() - 1);
+    }
+
     public void setDbConnection(DbConnection dbConnection) {
         this.dbConnection = dbConnection;
     }

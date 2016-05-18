@@ -2,10 +2,12 @@ package pl.edu.agh.dao;
 
 import org.springframework.beans.factory.InitializingBean;
 import pl.edu.agh.DbConnection;
+import pl.edu.agh.beans.ConsoleConfiguration;
 import pl.edu.agh.beans.Memory;
 import pl.edu.agh.beans.Network;
 import pl.edu.agh.beans.Service;
 
+import java.io.Console;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -13,7 +15,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MemoryDAO implements InitializingBean {
+public class ConsoleConfigurationDAO implements InitializingBean {
 
     private DbConnection dbConnection;
 
@@ -24,35 +26,27 @@ public class MemoryDAO implements InitializingBean {
         connection = dbConnection.getConnection();
     }
 
-    public List<Memory> listAll() throws SQLException {
-        PreparedStatement statement = connection.prepareStatement("SELECT * FROM memory_usage");
+    public List<ConsoleConfiguration> listAll() throws SQLException {
+        PreparedStatement statement = connection.prepareStatement("SELECT * FROM console_configuration");
 
         ResultSet result = statement.executeQuery();
-        List<Memory> memoryList = new ArrayList<Memory>();
+        List<ConsoleConfiguration> consoleConfigurationList = new ArrayList<ConsoleConfiguration>();
         while(result.next())
-            memoryList.add(new Memory(result));
+            consoleConfigurationList.add(new ConsoleConfiguration(result));
 
-        return memoryList;
+        return consoleConfigurationList;
     }
 
-    public List<Memory> getByServiceId(int serviceId) throws SQLException {
-        PreparedStatement statement = connection.prepareStatement("SELECT * FROM memory_usage where service_id=?");
+    public ConsoleConfiguration getByServiceId(int serviceId) throws SQLException {
+        PreparedStatement statement = connection.prepareStatement("SELECT * FROM console_configuration where service_id=?");
         statement.setInt(1, serviceId);
 
         ResultSet result = statement.executeQuery();
-        List<Memory> memoryList = new ArrayList<Memory>();
-        while(result.next())
-            memoryList.add(new Memory(result));
-
-        return memoryList;
+        result.next();
+        return new ConsoleConfiguration(result);
 
     }
 
-    public Memory getNewestByServiceId(int serviceId) throws SQLException {
-        List<Memory> memoryList = getByServiceId(serviceId);
-        return memoryList.get(memoryList.size() - 1);
-
-    }
 
     public void setDbConnection(DbConnection dbConnection) {
         this.dbConnection = dbConnection;

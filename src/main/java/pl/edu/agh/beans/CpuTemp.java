@@ -1,7 +1,5 @@
 package pl.edu.agh.beans;
 
-import javafx.util.converter.TimeStringConverter;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;

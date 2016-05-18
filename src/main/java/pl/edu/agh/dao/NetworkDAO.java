@@ -47,6 +47,11 @@ public class NetworkDAO implements InitializingBean {
 
     }
 
+    public Network getNewestByServiceId(int serviceId) throws SQLException {
+        List<Network> networkList = getByServiceId(serviceId);
+        return networkList.get(networkList.size() - 1);
+    }
+
     public void setDbConnection(DbConnection dbConnection) {
         this.dbConnection = dbConnection;
     }

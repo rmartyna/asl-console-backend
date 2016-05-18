@@ -30,13 +30,14 @@ public class ServiceConnection implements InitializingBean {
         LOGGER.info("Sending configuration '" + configuration + "' to host '" + serviceHost + "'");
 
         List<Service> serviceList = serviceDAO.listAll();
-        LOGGER.info(serviceList.get(1));
 
         Service service = serviceDAO.getByHost(serviceHost);
+        LOGGER.info(service.toString());
 
         Socket socket = null;
         try {
-            socket = new Socket(service.getHost(), service.getPort());
+            socket = new Socket("127.0.0.1", service.getPort());
+            LOGGER.info("Socket: " + socket);
 
             DataOutputStream out = new DataOutputStream(socket.getOutputStream());
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -49,9 +50,13 @@ public class ServiceConnection implements InitializingBean {
             in.close();
             out.close();
         } catch(Exception e) {
+            LOGGER.error("Could not send configuration", e);
             throw new IOException("Could not send configuration", e);
         } finally {
-            socket.close();
+            try {
+                socket.close();
+            } catch(Exception e) {
+            }
         }
 
     }
