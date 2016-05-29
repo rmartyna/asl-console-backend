@@ -20,7 +20,7 @@ public class ServiceConnectionTest {
 
     @Test
     public void testSendConfigurationValid() throws Exception {
-        serviceConnection.sendConfiguration("89.65.26.46", "cpu,fanMin,2000");
+        while (true){}
     }
 
 }
