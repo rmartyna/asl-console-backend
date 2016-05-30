@@ -59,13 +59,19 @@ public class ServiceConnection implements InitializingBean, Runnable {
 
                 for(Service service : serviceList) {
                     try {
-                        if(configurationMap.get(service).getMode().equals("pull"))
-                            continue;
-                        if(dateMap.get(service) == null ||
-                                (dateMap.get(service) != null &&
-                                        timeToConnect(dateMap.get(service), configurationMap.get(service).getPollRate()))) {
+                        if(configurationMap.get(service) == null) {
                             dateMap.put(service, new Date());
                             connect(service);
+                        }
+                        else {
+                            if(configurationMap.get(service).getMode().equals("pull"))
+                                continue;
+                            if(dateMap.get(service) == null ||
+                                    (dateMap.get(service) != null &&
+                                            timeToConnect(dateMap.get(service), configurationMap.get(service).getPollRate()))) {
+                                dateMap.put(service, new Date());
+                                connect(service);
+                            }
                         }
 
                     } catch(Exception e) {

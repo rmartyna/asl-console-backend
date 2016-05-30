@@ -1,6 +1,7 @@
 package pl.edu.agh;
 
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import pl.edu.agh.beans.ConsoleConfiguration;
 import pl.edu.agh.beans.Service;
@@ -20,11 +21,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class BackgroundServiceConnection implements InitializingBean, Runnable {
+public class BackgroundServiceConnection implements InitializingBean, Runnable, DisposableBean {
 
     private ServerSocket serverSocket;
 
     private Integer serverPort;
+
+    private Thread thread;
 
     private static final Logger LOGGER = Logger.getLogger(BackgroundServiceConnection.class);
 
@@ -32,7 +35,13 @@ public class BackgroundServiceConnection implements InitializingBean, Runnable {
     public void afterPropertiesSet() throws Exception {
 
         serverSocket = new ServerSocket(serverPort);
-        new Thread(this).start();
+        thread = new Thread(this);
+    }
+
+    @Override
+    public void destroy() throws Exception {
+        thread.interrupt();
+        serverSocket.close();
     }
 
     public void run() {
