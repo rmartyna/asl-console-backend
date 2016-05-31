@@ -4,6 +4,11 @@ import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 
+/**
+ * This software may be modified and distributed under the terms
+ *  of the BSD license.  See the LICENSE.txt file for details.
+ */
+
 public class MailUtils {
 
     private JavaMailSenderImpl mailSender;

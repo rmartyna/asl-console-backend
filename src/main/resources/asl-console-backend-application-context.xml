@@ -39,6 +39,7 @@
 
     <bean id="backgroundServiceConnection" class="pl.edu.agh.BackgroundServiceConnection">
         <property name="serverPort" value="${server.port}"/>
+        <property name="serviceDAO" ref="serviceDAO"/>
     </bean>
 
 </beans>

@@ -11,6 +11,11 @@ import pl.edu.agh.dao.CpuDAO;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * This software may be modified and distributed under the terms
+ *  of the BSD license.  See the LICENSE.txt file for details.
+ */
+
 public class CpuDAOTest {
 
     private static ApplicationContext applicationContext;

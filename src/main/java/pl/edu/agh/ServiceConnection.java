@@ -1,5 +1,10 @@
 package pl.edu.agh;
 
+/**
+ * This software may be modified and distributed under the terms
+ *  of the BSD license.  See the LICENSE.txt file for details.
+ */
+
 import org.apache.log4j.Logger;
 import org.apache.log4j.or.ThreadGroupRenderer;
 import org.springframework.beans.factory.InitializingBean;
@@ -53,9 +58,10 @@ public class ServiceConnection implements InitializingBean, Runnable {
                         configurationMap.put(service, serviceConfigurationDAO.getByServiceId((int) service.getId()));
 
                     } catch (Exception e) {
-                        LOGGER.error("Error creating maps for service: " + service, e);
+                        LOGGER.error("No service configuration for service: " + service);
                     }
                 }
+
 
                 for(Service service : serviceList) {
                     try {
@@ -64,8 +70,6 @@ public class ServiceConnection implements InitializingBean, Runnable {
                             connect(service);
                         }
                         else {
-                            if(configurationMap.get(service).getMode().equals("pull"))
-                                continue;
                             if(dateMap.get(service) == null ||
                                     (dateMap.get(service) != null &&
                                             timeToConnect(dateMap.get(service), configurationMap.get(service).getPollRate()))) {
@@ -75,9 +79,11 @@ public class ServiceConnection implements InitializingBean, Runnable {
                         }
 
                     } catch(Exception e) {
-                        LOGGER.error("Error connecting with daemon", e);
+                        if(configurationMap.get(service).equals("push"))
+                            LOGGER.error("Error connecting with daemon", e);
                     }
                 }
+
                 Thread.sleep(1000);
 
             } catch(Exception e) {
@@ -97,8 +103,26 @@ public class ServiceConnection implements InitializingBean, Runnable {
         try {
             LOGGER.info("Connecting to service: " + service);
             Socket socket = new Socket(service.getHost(), service.getPort());
+            socket.setSoTimeout(100);
             DataOutputStream out = new DataOutputStream(socket.getOutputStream());
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+
+            try {
+                serviceDAO.getById((int) service.getId());
+            } catch(Exception e) {
+                out.writeBytes("remove\r\n");
+                in.readLine();
+                LOGGER.info("Server removed: " + service);
+
+                in.close();
+                out.close();
+                socket.close();
+
+                socket = new Socket(service.getHost(), service.getPort());
+
+                out = new DataOutputStream(socket.getOutputStream());
+                in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            }
 
             out.writeBytes("data\r\n");
             String result = in.readLine();
@@ -136,44 +160,6 @@ public class ServiceConnection implements InitializingBean, Runnable {
         }
     }
 
-
-    /*
-    public void sendConfiguration(String serviceHost, String configuration) throws IOException, SQLException {
-        LOGGER.info("Sending configuration '" + configuration + "' to host '" + serviceHost + "'");
-
-        List<Service> serviceList = serviceDAO.listAll();
-
-        Service service = serviceDAO.getByHost(serviceHost);
-        LOGGER.info(service.toString());
-
-        Socket socket = null;
-        try {
-            socket = new Socket("127.0.0.1", service.getPort());
-              LOGGER.info("Socket: " + socket);
-
-            DataOutputStream out = new DataOutputStream(socket.getOutputStream());
-            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-
-            out.writeBytes(configuration + "\r\n");
-
-            String result = in.readLine();
-            LOGGER.info("Service response: " + result);
-
-            in.close();
-            out.close();
-        } catch(Exception e) {
-            LOGGER.error("Could not send configuration", e);
-            throw new IOException("Could not send configuration", e);
-        } finally {
-            try {
-                socket.close();
-            } catch(Exception e) {
-            }
-        }
-
-    }
-
-    */
 
     public void setServiceDAO(ServiceDAO serviceDAO) {
         this.serviceDAO = serviceDAO;

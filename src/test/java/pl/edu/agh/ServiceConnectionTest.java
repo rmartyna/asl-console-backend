@@ -6,6 +6,11 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import pl.edu.agh.beans.Service;
 
+/**
+ * This software may be modified and distributed under the terms
+ *  of the BSD license.  See the LICENSE.txt file for details.
+ */
+
 public class ServiceConnectionTest {
 
     private static ApplicationContext applicationContext;

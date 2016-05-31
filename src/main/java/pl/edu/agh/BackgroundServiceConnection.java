@@ -21,13 +21,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class BackgroundServiceConnection implements InitializingBean, Runnable, DisposableBean {
+/**
+ * This software may be modified and distributed under the terms
+ *  of the BSD license.  See the LICENSE.txt file for details.
+ */
+
+public class BackgroundServiceConnection implements InitializingBean, Runnable{
 
     private ServerSocket serverSocket;
 
-    private Integer serverPort;
+    private ServiceDAO serviceDAO;
 
-    private Thread thread;
+    private Integer serverPort;
 
     private static final Logger LOGGER = Logger.getLogger(BackgroundServiceConnection.class);
 
@@ -35,13 +40,7 @@ public class BackgroundServiceConnection implements InitializingBean, Runnable, 
     public void afterPropertiesSet() throws Exception {
 
         serverSocket = new ServerSocket(serverPort);
-        thread = new Thread(this);
-    }
-
-    @Override
-    public void destroy() throws Exception {
-        thread.interrupt();
-        serverSocket.close();
+        new Thread(this).start();
     }
 
     public void run() {
@@ -55,6 +54,14 @@ public class BackgroundServiceConnection implements InitializingBean, Runnable, 
                 DataOutputStream out = new DataOutputStream(client.getOutputStream());
 
                 LOGGER.info("Daemon message: " + message);
+                if(message.matches("^-?\\d+$")) {
+                    try {
+                        serviceDAO.getById(Integer.parseInt(message));
+                        out.writeBytes("OK\r\n");
+                    } catch(Exception e) {
+                        out.writeBytes("remove\r\n");
+                    }
+                }
                 if(message.equalsIgnoreCase("data")) {
                     out.writeBytes("OK\r\n");
                 }
@@ -77,5 +84,9 @@ public class BackgroundServiceConnection implements InitializingBean, Runnable, 
 
     public void setServerPort(Integer serverPort) {
         this.serverPort = serverPort;
+    }
+
+    public void setServiceDAO(ServiceDAO serviceDAO) {
+        this.serviceDAO = serviceDAO;
     }
 }
