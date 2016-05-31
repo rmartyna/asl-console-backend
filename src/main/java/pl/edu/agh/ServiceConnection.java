@@ -1,10 +1,5 @@
 package pl.edu.agh;
 
-/**
- * This software may be modified and distributed under the terms
- *  of the BSD license.  See the LICENSE.txt file for details.
- */
-
 import org.apache.log4j.Logger;
 import org.apache.log4j.or.ThreadGroupRenderer;
 import org.springframework.beans.factory.InitializingBean;
@@ -27,14 +22,28 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * This software may be modified and distributed under the terms
+ *  of the BSD license.  See the LICENSE.txt file for details.
+ */
+
+/**
+ * Connects to services that run in push mode
+ */
 public class ServiceConnection implements InitializingBean, Runnable {
 
     private ServiceDAO serviceDAO;
 
     private List<Service> serviceList;
 
+    /**
+     * Maps from Service to its Configuration
+     */
     private Map<Service, ServiceConfiguration> configurationMap = new HashMap<Service, ServiceConfiguration>();
 
+    /**
+     * Maps from service to the last date it was communicated with
+     */
     private Map<Service, Date> dateMap = new HashMap<Service, Date>();
 
     private ServiceConfigurationDAO serviceConfigurationDAO;
@@ -47,6 +56,9 @@ public class ServiceConnection implements InitializingBean, Runnable {
         new Thread(this).start();
     }
 
+    /**
+     * Loads severs and their configuration, and connects with them
+     */
     public void run() {
         while(true) {
             try {
@@ -93,12 +105,20 @@ public class ServiceConnection implements InitializingBean, Runnable {
 
     }
 
+    /**
+     * Checks if we should connect with Server again
+     */
     public boolean timeToConnect(Date lastConnect, int pollRate) {
         if(new Date().getTime() - lastConnect.getTime() > pollRate)
             return true;
         return false;
     }
 
+    /**
+     * 1. Checks if server was removed.
+     * 2. Allows to send data.
+     * 3. Allows to read configuration.
+     */
     public void connect(Service service) {
         try {
             LOGGER.info("Connecting to service: " + service);

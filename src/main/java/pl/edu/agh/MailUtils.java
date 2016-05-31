@@ -9,10 +9,16 @@ import org.springframework.mail.javamail.JavaMailSenderImpl;
  *  of the BSD license.  See the LICENSE.txt file for details.
  */
 
+/**
+ * Contains methods which allow to send mail messages
+ */
 public class MailUtils {
 
     private JavaMailSenderImpl mailSender;
 
+    /**
+     * Sends simple mail message
+     */
     public void sendMail(String from, String to, String subject, String content) {
 
         SimpleMailMessage message = new SimpleMailMessage();

@@ -26,6 +26,9 @@ import java.util.Map;
  *  of the BSD license.  See the LICENSE.txt file for details.
  */
 
+/**
+ * Connects to services that run in pull mode
+ */
 public class BackgroundServiceConnection implements InitializingBean, Runnable{
 
     private ServerSocket serverSocket;
@@ -43,6 +46,11 @@ public class BackgroundServiceConnection implements InitializingBean, Runnable{
         new Thread(this).start();
     }
 
+    /**
+     * 1. Checks if server was removed.
+     * 2. Allows to send data.
+     * 3. Allows to read configuration.
+     */
     public void run() {
         while(true) {
             try {
