@@ -149,7 +149,7 @@ public class ServiceConnection implements InitializingBean, Runnable {
         Socket socket = null;
         try {
             socket = new Socket("127.0.0.1", service.getPort());
-            LOGGER.info("Socket: " + socket);
+              LOGGER.info("Socket: " + socket);
 
             DataOutputStream out = new DataOutputStream(socket.getOutputStream());
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
