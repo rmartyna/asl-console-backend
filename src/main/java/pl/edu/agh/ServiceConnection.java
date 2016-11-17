@@ -16,11 +16,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.security.MessageDigest;
 import java.sql.SQLException;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * This software may be modified and distributed under the terms
@@ -68,28 +66,20 @@ public class ServiceConnection implements InitializingBean, Runnable {
                 for (Service service : serviceList) {
                     try {
                         configurationMap.put(service, serviceConfigurationDAO.getByServiceId((int) service.getId()));
-
                     } catch (Exception e) {
                         LOGGER.error("No service configuration for service: " + service);
                     }
                 }
 
 
-                for(Service service : serviceList) {
+                for(Service service : configurationMap.keySet()) {
                     try {
-                        if(configurationMap.get(service) == null) {
+                        if(dateMap.get(service) == null ||
+                                (dateMap.get(service) != null &&
+                                        timeToConnect(dateMap.get(service), configurationMap.get(service).getPollRate()))) {
                             dateMap.put(service, new Date());
                             connect(service);
                         }
-                        else {
-                            if(dateMap.get(service) == null ||
-                                    (dateMap.get(service) != null &&
-                                            timeToConnect(dateMap.get(service), configurationMap.get(service).getPollRate()))) {
-                                dateMap.put(service, new Date());
-                                connect(service);
-                            }
-                        }
-
                     } catch(Exception e) {
                         if(configurationMap.get(service).equals("push"))
                             LOGGER.error("Error connecting with daemon", e);
@@ -106,7 +96,7 @@ public class ServiceConnection implements InitializingBean, Runnable {
     }
 
     /**
-     * Checks if we should connect with Server again
+     * Checks if we should connect with server again
      */
     public boolean timeToConnect(Date lastConnect, int pollRate) {
         if(new Date().getTime() - lastConnect.getTime() > pollRate)
@@ -115,65 +105,24 @@ public class ServiceConnection implements InitializingBean, Runnable {
     }
 
     /**
-     * 1. Checks if server was removed.
-     * 2. Allows to send data.
-     * 3. Allows to read configuration.
+     * 1. Sends data to service: console password | service password | service id
      */
     public void connect(Service service) {
         try {
             LOGGER.info("Connecting to service: " + service);
             Socket socket = new Socket(service.getHost(), service.getPort());
-            socket.setSoTimeout(100);
+            socket.setSoTimeout(300);
             DataOutputStream out = new DataOutputStream(socket.getOutputStream());
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-            try {
-                serviceDAO.getById((int) service.getId());
-            } catch(Exception e) {
-                out.writeBytes("remove\r\n");
-                in.readLine();
-                LOGGER.info("Server removed: " + service);
-
-                in.close();
-                out.close();
-                socket.close();
-
-                socket = new Socket(service.getHost(), service.getPort());
-
-                out = new DataOutputStream(socket.getOutputStream());
-                in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            }
-
-            out.writeBytes("data\r\n");
-            String result = in.readLine();
-            LOGGER.info("Service response: " + result);
-
-            if(!result.equalsIgnoreCase("OK")) {
-                LOGGER.error("Invalid response");
-                return;
-            }
+            out.writeBytes(service.getPassword() + "|" + service.getId() + "\r\n");
+            String response = in.readLine();
 
             in.close();
             out.close();
             socket.close();
 
-            socket = new Socket(service.getHost(), service.getPort());
-
-            out = new DataOutputStream(socket.getOutputStream());
-            in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-
-            out.writeBytes("conf\r\n");
-            result = in.readLine();
-            LOGGER.info("Service response: " + result);
-
-            if(!result.equalsIgnoreCase("OK")) {
-                LOGGER.error("Invalid response");
-                return;
-            }
-
-            in.close();
-            out.close();
-            socket.close();
+            LOGGER.info("Service response: " + response);
 
         } catch(Exception e) {
             LOGGER.error("Error connecting with daemon: " + e.getMessage());
@@ -184,7 +133,6 @@ public class ServiceConnection implements InitializingBean, Runnable {
     public void setServiceDAO(ServiceDAO serviceDAO) {
         this.serviceDAO = serviceDAO;
     }
-
 
     public void setServiceConfigurationDAO(ServiceConfigurationDAO serviceConfigurationDAO) {
         this.serviceConfigurationDAO = serviceConfigurationDAO;

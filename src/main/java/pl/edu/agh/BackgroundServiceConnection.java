@@ -47,14 +47,12 @@ public class BackgroundServiceConnection implements InitializingBean, Runnable{
     }
 
     /**
-     * 1. Checks if server was removed.
-     * 2. Allows to send data.
-     * 3. Allows to read configuration.
+     * Compares sent hash to the one in database
      */
     public void run() {
         while(true) {
             try {
-                LOGGER.info("Accepting connections on pot: " + serverPort);
+                LOGGER.info("Accepting connections on port: " + serverPort);
                 Socket client = serverSocket.accept();
 
                 BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
@@ -62,22 +60,17 @@ public class BackgroundServiceConnection implements InitializingBean, Runnable{
                 DataOutputStream out = new DataOutputStream(client.getOutputStream());
 
                 LOGGER.info("Daemon message: " + message);
-                if(message.matches("^-?\\d+$")) {
-                    try {
-                        serviceDAO.getById(Integer.parseInt(message));
-                        out.writeBytes("OK\r\n");
-                    } catch(Exception e) {
-                        out.writeBytes("remove\r\n");
-                    }
-                }
-                if(message.equalsIgnoreCase("data")) {
+
+                String[] data = message.trim().split("\\|");
+                try {
+                    Service service = serviceDAO.getById(Integer.parseInt(data[1]));
+                    if(!data[0].equalsIgnoreCase(service.getPassword()))
+                        throw new IllegalArgumentException("Daemon password: " + data[0] +
+                                " does not match server password: " + service.getPassword());
                     out.writeBytes("OK\r\n");
-                }
-                else if(message.equalsIgnoreCase("conf")) {
-                    out.writeBytes("OK\r\n");
-                }
-                else {
-                    LOGGER.error("Invalid message");
+                } catch(Exception e) {
+                    LOGGER.error("Could not find server: " + message.trim(), e);
+                    out.writeBytes("ERROR\r\n");
                 }
 
                 in.close();
